@@ -2,7 +2,7 @@
 
 if [ -z `which icu-config` ]; then
     echo "Error: icu-config not found!"
-    exit 2
+    return
 else
     icu_version=`icu-config --version`
     echo "Using ICU version $icu_version..."
@@ -10,7 +10,7 @@ fi
 
 if [ -z "$gtm_dist" ]; then
     echo 'Error: $gtm_dist variable not set.'
-    exit 2
+    return
 else
     echo "Using GT.M at $gtm_dist..."
 fi
@@ -23,7 +23,7 @@ for dir in "routines" "globals" "log" "tmp"
 do
     if [ ! -d "$PWD/$dir" ]; then
         echo "Error: $PWD/$dir does not exist.  Please create it."
-        exit 2
+        return
     fi
 done
 
@@ -173,10 +173,15 @@ if [ -n "$LC_CTYPE" ]; then
     _old_LC_CTYPE=$LC_CTYPE
 fi
 
+# Set up Unicode handling, if applicable.
+
+if [ `basename $gtm_dist` = 'utf8' ]; then
+    export gtm_icu_version='4.2' # TODO calculate this dynamically
+    export gtm_chset=UTF-8
+    export LC_LCTYPE=en_US.utf8
+fi
+
 export gtmver=`$gtm_dist/mumps -r %XCMD 'W $P($ZV," ",2)_"_"_$P($ZV," ",4)'`
-export gtm_icu_version='4.2'
-export gtm_chset=UTF-8
-export LC_LCTYPE=en_US.utf8
 export gtm_retention=42
 export mumps_root=$PWD
 export PATH="$PWD/bin:$PATH"
