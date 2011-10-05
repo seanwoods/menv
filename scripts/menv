@@ -1,0 +1,46 @@
+#!/bin/sh
+
+VERSION='0.1'
+
+WGET=`which wget`
+
+DIST="menv-$VERSION.tar.gz" 
+SRC="https://downloads.sourceforge.net/project/menv/$DIST?r=&ts=1317774672&use_mirror=heanet"
+TMP="/tmp"
+
+_PWD=$PWD
+
+check_wget () {
+    if [ -z "$WGET" ]; then
+        echo "Error. Valid wget not found, required for this operation."
+        exit 2
+    fi
+}
+
+case $1 in
+    init)
+        check_wget
+        cd /tmp
+        rm "$TMP/$DIST"
+        wget "$SRC/$DIST" -O "$TMP/$DIST"
+
+        if [ $? -ne 0 ]; then
+            echo "Error: wget exited with status $?..."
+            exit 2
+        fi
+        
+        cd $_PWD
+
+        tar -xzvf "$TMP/$DIST"
+        mv $_PWD/menv-$VERSION/*  $_PWD
+        rmdir "$_PWD/menv-$VERSION"
+    ;;
+    *)
+        if [ ! -f "$PWD/bin/$1" ]; then
+            echo "menv: Plugin $1 not found."
+            exit 2
+        else
+            $PWD/bin/$1
+        fi
+    ;;
+esac
