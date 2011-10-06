@@ -1,11 +1,11 @@
 #!/bin/sh
 
-VERSION='0.1'
+VERSION='master'
 
 WGET=`which wget`
 
 DIST="menv-$VERSION.tar.gz" 
-SRC="https://downloads.sourceforge.net/project/menv/$DIST?r=&ts=1317774672&use_mirror=heanet"
+SRC="https://github.com/seanwoods/menv/tarball/$VERSION"
 TMP="/tmp"
 
 _PWD=$PWD
@@ -20,20 +20,41 @@ check_wget () {
 case $1 in
     init)
         check_wget
-        cd /tmp
-        rm "$TMP/$DIST"
-        wget "$SRC/$DIST" -O "$TMP/$DIST"
+        cd $TMP && mkdir "menv$$" && cd "menv$$"
+
+        if [ `basename $PWD` != "menv$$" ]; then
+            echo "Error: Problem creating temp directory..."
+            cd $_PWD
+            exit 2
+        fi
+
+        wget $SRC -O - | tar -xzv
 
         if [ $? -ne 0 ]; then
-            echo "Error: wget exited with status $?..."
+            echo "Error: Problem with wget or tar operation PID $?..."
+            cd $_PWD
             exit 2
         fi
         
-        cd $_PWD
+        if [ `ls | wc -l` -gt 1 ]; then
+            echo "Error: Untar resulted in more than one file..."
+            cd $_PWD
+            exit 2
+        else
+            newdir=`ls`
+        fi
+        cd $newdir/skeleton
+        
+        mv * $_PWD && cd $_PWD
+        rm -rf "$TMP/menv$$"
 
-        tar -xzvf "$TMP/$DIST"
-        mv $_PWD/menv-$VERSION/*  $_PWD
-        rmdir "$_PWD/menv-$VERSION"
+        for dir in routines globals log tmp
+        do
+            if [ ! -d $dir ]; then
+                mkdir $dir
+            fi
+        done
+
     ;;
     *)
         if [ ! -f "$PWD/bin/$1" ]; then
