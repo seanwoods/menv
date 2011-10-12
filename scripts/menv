@@ -47,6 +47,7 @@ case $1 in
         
         mv * $_PWD && cd $_PWD
         rm -rf "$TMP/menv$$"
+        touch $_PWD/.menv
 
         for dir in routines globals log tmp
         do
@@ -55,6 +56,17 @@ case $1 in
             fi
         done
 
+    ;;
+    activate)
+        echo "You can't activate the environment via the menv script."
+        echo "Instead, type \`source bin/activate\`."
+        
+        if [ -z "$gtm_dist"]; then
+            echo ""
+            echo "Also, you haven't set \$gtm_dist yet.  You should do that."
+        fi
+
+        exit 2
     ;;
     *)
         if [ ! -f "$PWD/bin/$1" ]; then
