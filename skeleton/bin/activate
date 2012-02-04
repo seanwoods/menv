@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo $0
+
 if [ -z `which icu-config` ]; then
     echo "Error: icu-config not found!"
     return
@@ -176,7 +178,7 @@ fi
 # Set up Unicode handling, if applicable.
 
 if [ `basename $gtm_dist` = 'utf8' ]; then
-    export gtm_icu_version='4.2' # TODO calculate this dynamically
+    export gtm_icu_version=$(`icu-config --version` | cut -d '.' -f 1,2 | tr -d '.')
     export gtm_chset=UTF-8
     export LC_LCTYPE=en_US.utf8
 fi
